@@ -1,0 +1,60 @@
+#![warn(clippy::pedantic)]
+
+use std::collections::BTreeMap;
+
+pub mod binary;
+pub mod snbt;
+
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub enum Variant {
+    Byte(u8),
+    Int16(u16),
+    Int32(u32),
+    Int64(u64),
+    Float32(f32),
+    Float64(f64),
+    String(String),
+    List(List),
+    Compound(Compound),
+    ByteList(ListVariant<u8>),
+    Int32List(ListVariant<u32>),
+    Int64List(ListVariant<u64>),
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub enum List {
+    Byte(ListVariant<u8>),
+    Int16(ListVariant<u16>),
+    Int32(ListVariant<u32>),
+    Int64(ListVariant<u64>),
+    Float32(ListVariant<f32>),
+    Float64(ListVariant<f64>),
+    String(ListVariant<String>),
+    List(ListVariant<List>),
+    Compound(ListVariant<Compound>),
+    ByteList(ListVariant<ListVariant<u8>>),
+    Int32List(ListVariant<ListVariant<u32>>),
+    Int64List(ListVariant<ListVariant<u64>>),
+    Empty,
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct ListVariant<T>(pub Vec<T>);
+
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct Compound(pub BTreeMap<String, Variant>);
+
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct NamedTag(String, Variant);
+
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct BedrockHeader {
+    pub version: u16,
+    pub size: u16,
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct BedrockNbtFile {
+    pub header: Option<BedrockHeader>,
+    pub tag: NamedTag,
+}
