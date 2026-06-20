@@ -1,4 +1,7 @@
 pub mod tokenize;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SourcePosition(usize);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Span(std::range::Range<SourcePosition>);
