@@ -40,7 +40,13 @@ impl<'src> Parser<'src> {
         }
     }
 
-    pub fn parse_variant(
+    pub fn parse_variant_and_finish(mut self) -> Result<Variant<'src>, Error<'src>> {
+        let variant = self.parse_variant(None)?;
+        self.expect_token(|token| token.token == Token::Eof)?;
+        Ok(variant)
+    }
+
+    fn parse_variant(
         &mut self,
         first_token: Option<SpannedToken<'src>>,
     ) -> Result<Variant<'src>, Error<'src>> {

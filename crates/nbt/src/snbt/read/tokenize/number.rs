@@ -46,7 +46,7 @@ pub struct Float<'src> {
     pub r#type: FloatType,
     pub integer_part: Option<&'src [u8]>,
     pub fractional_part: Option<&'src [u8]>,
-    pub exponential_part: Option<(Sign, &'src [u8])>,
+    pub exponent_part: Option<(Sign, &'src [u8])>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -133,8 +133,8 @@ impl<'src> NumberParser<'src> {
                 None
             };
 
-            let exponential_part = self.take_optional_exponential_part();
-            is_float |= exponential_part.is_some();
+            let exponent_part = self.take_optional_exponent_part();
+            is_float |= exponent_part.is_some();
 
             if is_float {
                 let r#type = self.take_float_type();
@@ -143,7 +143,7 @@ impl<'src> NumberParser<'src> {
                     r#type,
                     integer_part: Some(integer_part),
                     fractional_part,
-                    exponential_part,
+                    exponent_part,
                 }));
             } else {
                 let (signedness, r#type) = self.take_int_type();
@@ -163,14 +163,14 @@ impl<'src> NumberParser<'src> {
             self.position += 1;
 
             let fractional_part = self.take_denary_sequence();
-            let exponential_part = self.take_optional_exponential_part();
+            let exponent_part = self.take_optional_exponent_part();
             let r#type = self.take_float_type();
             return Ok(Number::Float(Float {
                 sign,
                 r#type,
                 integer_part: None,
                 fractional_part: Some(fractional_part),
-                exponential_part,
+                exponent_part,
             }));
         }
 
@@ -237,7 +237,7 @@ impl<'src> NumberParser<'src> {
         }
     }
 
-    fn take_optional_exponential_part(&mut self) -> Option<(Sign, &'src [u8])> {
+    fn take_optional_exponent_part(&mut self) -> Option<(Sign, &'src [u8])> {
         if matches!(
             self.source.get(self.position..=self.position + 1),
             Some([b'e' | b'E', b'0'..=b'9'])
@@ -352,7 +352,7 @@ fn take_number() {
                 r#type: FloatType::Float64,
                 integer_part: None,
                 fractional_part: Some(b"1"),
-                exponential_part: None,
+                exponent_part: None,
             }),
         ),
         (
@@ -362,7 +362,7 @@ fn take_number() {
                 r#type: FloatType::Float64,
                 integer_part: Some(b"1"),
                 fractional_part: None,
-                exponential_part: None,
+                exponent_part: None,
             }),
         ),
         (
@@ -372,7 +372,7 @@ fn take_number() {
                 r#type: FloatType::Float64,
                 integer_part: Some(b"1"),
                 fractional_part: Some(b"2"),
-                exponential_part: Some((Sign::Positive, b"3")),
+                exponent_part: Some((Sign::Positive, b"3")),
             }),
         ),
         (
@@ -382,7 +382,7 @@ fn take_number() {
                 r#type: FloatType::Float64,
                 integer_part: Some(b"87"),
                 fractional_part: None,
-                exponential_part: Some((Sign::Positive, b"48")),
+                exponent_part: Some((Sign::Positive, b"48")),
             }),
         ),
         (
@@ -392,7 +392,7 @@ fn take_number() {
                 r#type: FloatType::Float64,
                 integer_part: Some(b"0"),
                 fractional_part: Some(b"1"),
-                exponential_part: Some((Sign::Negative, b"1")),
+                exponent_part: Some((Sign::Negative, b"1")),
             }),
         ),
         (
@@ -447,7 +447,7 @@ fn take_number() {
                 r#type: FloatType::Float32,
                 integer_part: Some(b"1_2"),
                 fractional_part: Some(b"3_4__5"),
-                exponential_part: None,
+                exponent_part: None,
             }),
         ),
         (
@@ -457,7 +457,7 @@ fn take_number() {
                 r#type: FloatType::Float64,
                 integer_part: Some(b"1_2"),
                 fractional_part: None,
-                exponential_part: Some((Sign::Positive, b"3_4")),
+                exponent_part: Some((Sign::Positive, b"3_4")),
             }),
         ),
         (

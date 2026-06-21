@@ -77,8 +77,30 @@ impl<'src> TryFrom<parse::List<'src>> for List {
                     })
                     .collect::<Result<_, _>>()?,
             ))),
-            TypeTag::Float32 => todo!(),
-            TypeTag::Float64 => todo!(),
+            TypeTag::Float32 => Ok(List::Float32(ListVariant(
+                list.list
+                    .into_iter()
+                    .map(|item| {
+                        let parse::Variant::Float(float) = item else {
+                            unreachable!("list of float32s must contain only floats");
+                        };
+
+                        float.try_into()
+                    })
+                    .collect::<Result<_, _>>()?,
+            ))),
+            TypeTag::Float64 => Ok(List::Float64(ListVariant(
+                list.list
+                    .into_iter()
+                    .map(|item| {
+                        let parse::Variant::Float(float) = item else {
+                            unreachable!("list of float64s must contain only floats");
+                        };
+
+                        float.try_into()
+                    })
+                    .collect::<Result<_, _>>()?,
+            ))),
             TypeTag::String => Ok(List::String(ListVariant(
                 list.list
                     .into_iter()

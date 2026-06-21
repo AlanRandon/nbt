@@ -32,6 +32,11 @@ pub enum Error<'src> {
         integer: parse::SpannedInt<'src>,
         result_type: IntType,
     },
+    #[error("float must fit within specified type")]
+    FloatTooLarge {
+        float: parse::SpannedFloat<'src>,
+        result_type: FloatType,
+    },
 }
 
 impl<'src> TryFrom<parse::Variant<'src>> for Variant {

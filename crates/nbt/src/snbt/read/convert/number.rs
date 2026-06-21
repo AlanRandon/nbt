@@ -1,7 +1,7 @@
 use crate::Variant;
 use crate::snbt::read::convert::Error;
 use crate::snbt::read::parse;
-use crate::snbt::read::tokenize::number::{IntBytes, IntType, Sign, Signedness};
+use crate::snbt::read::tokenize::number::{FloatType, IntBytes, IntType, Sign, Signedness};
 
 impl<'src> TryFrom<parse::SpannedInt<'src>> for Variant {
     type Error = Error<'src>;
@@ -255,7 +255,205 @@ impl<'src> TryFrom<parse::SpannedFloat<'src>> for Variant {
     type Error = Error<'src>;
 
     fn try_from(float: parse::SpannedFloat<'src>) -> Result<Self, Self::Error> {
-        todo!()
+        match float.float.r#type {
+            FloatType::Float32 => float.try_into().map(Variant::Float32),
+            FloatType::Float64 => float.try_into().map(Variant::Float64),
+        }
+    }
+}
+impl<'src> TryFrom<parse::SpannedFloat<'src>> for f32 {
+    type Error = Error<'src>;
+
+    fn try_from(float: parse::SpannedFloat<'src>) -> Result<Self, Self::Error> {
+        let integer_part = if let Some(integer_part) = float.float.integer_part {
+            match integer_part
+                .iter()
+                .rev()
+                .filter(|byte| **byte != b'_')
+                .map(|byte| byte - b'0')
+                .enumerate()
+                .fold(Some(0f32), |result, (place_value, digit)| {
+                    let result = result?;
+                    let digit = f32::from(digit);
+                    let place_value = i32::try_from(place_value).ok()?;
+                    let value = digit * 10f32.powi(place_value);
+                    Some(result + value)
+                }) {
+                Some(integer_part) => integer_part,
+                None => {
+                    return Err(Error::FloatTooLarge {
+                        float,
+                        result_type: FloatType::Float32,
+                    });
+                }
+            }
+        } else {
+            0.
+        };
+
+        let fractional_part = if let Some(fractional_part) = float.float.fractional_part {
+            match fractional_part
+                .iter()
+                .filter(|byte| **byte != b'_')
+                .map(|byte| byte - b'0')
+                .enumerate()
+                .fold(Some(0f32), |result, (place_value, digit)| {
+                    let result = result?;
+                    let digit = f32::from(digit);
+                    let place_value = i32::try_from(place_value)
+                        .ok()?
+                        .checked_add(1)?
+                        .checked_neg()?;
+                    let value = digit * 10f32.powi(place_value);
+                    Some(result + value)
+                }) {
+                Some(fractional_part) => fractional_part,
+                None => {
+                    return Err(Error::FloatTooLarge {
+                        float,
+                        result_type: FloatType::Float32,
+                    });
+                }
+            }
+        } else {
+            0.
+        };
+
+        let exponent_part = if let Some((exponent_sign, exponent_part)) = float.float.exponent_part
+        {
+            match exponent_part
+                .iter()
+                .rev()
+                .filter(|byte| **byte != b'_')
+                .map(|byte| byte - b'0')
+                .enumerate()
+                .fold(Some(0f32), |result, (place_value, digit)| {
+                    let result = result?;
+                    let digit = f32::from(digit);
+                    let place_value = i32::try_from(place_value).ok()?;
+                    let value = digit * 10f32.powi(place_value);
+                    Some(result + value)
+                }) {
+                Some(exponent_part) => match exponent_sign {
+                    Sign::Positive => exponent_part,
+                    Sign::Negative => -exponent_part,
+                },
+                None => {
+                    return Err(Error::FloatTooLarge {
+                        float,
+                        result_type: FloatType::Float32,
+                    });
+                }
+            }
+        } else {
+            0.
+        };
+
+        let value = (integer_part + fractional_part) * 10f32.powf(exponent_part);
+        let value = match float.float.sign {
+            Sign::Positive => value,
+            Sign::Negative => -value,
+        };
+
+        Ok(value)
+    }
+}
+
+impl<'src> TryFrom<parse::SpannedFloat<'src>> for f64 {
+    type Error = Error<'src>;
+
+    fn try_from(float: parse::SpannedFloat<'src>) -> Result<Self, Self::Error> {
+        let integer_part = if let Some(integer_part) = float.float.integer_part {
+            match integer_part
+                .iter()
+                .rev()
+                .filter(|byte| **byte != b'_')
+                .map(|byte| byte - b'0')
+                .enumerate()
+                .fold(Some(0f64), |result, (place_value, digit)| {
+                    let result = result?;
+                    let digit = f64::from(digit);
+                    let place_value = i32::try_from(place_value).ok()?;
+                    let value = digit * 10f64.powi(place_value);
+                    Some(result + value)
+                }) {
+                Some(integer_part) => integer_part,
+                None => {
+                    return Err(Error::FloatTooLarge {
+                        float,
+                        result_type: FloatType::Float64,
+                    });
+                }
+            }
+        } else {
+            0.
+        };
+
+        let fractional_part = if let Some(fractional_part) = float.float.fractional_part {
+            match fractional_part
+                .iter()
+                .filter(|byte| **byte != b'_')
+                .map(|byte| byte - b'0')
+                .enumerate()
+                .fold(Some(0f64), |result, (place_value, digit)| {
+                    let result = result?;
+                    let digit = f64::from(digit);
+                    let place_value = i32::try_from(place_value)
+                        .ok()?
+                        .checked_add(1)?
+                        .checked_neg()?;
+                    let value = digit * 10f64.powi(place_value);
+                    Some(result + value)
+                }) {
+                Some(fractional_part) => fractional_part,
+                None => {
+                    return Err(Error::FloatTooLarge {
+                        float,
+                        result_type: FloatType::Float64,
+                    });
+                }
+            }
+        } else {
+            0.
+        };
+
+        let exponent_part = if let Some((exponent_sign, exponent_part)) = float.float.exponent_part
+        {
+            match exponent_part
+                .iter()
+                .rev()
+                .filter(|byte| **byte != b'_')
+                .map(|byte| byte - b'0')
+                .enumerate()
+                .fold(Some(0f64), |result, (place_value, digit)| {
+                    let result = result?;
+                    let digit = f64::from(digit);
+                    let place_value = i32::try_from(place_value).ok()?;
+                    let value = digit * 10f64.powi(place_value);
+                    Some(result + value)
+                }) {
+                Some(exponent_part) => match exponent_sign {
+                    Sign::Positive => exponent_part,
+                    Sign::Negative => -exponent_part,
+                },
+                None => {
+                    return Err(Error::FloatTooLarge {
+                        float,
+                        result_type: FloatType::Float64,
+                    });
+                }
+            }
+        } else {
+            0.
+        };
+
+        let value = (integer_part + fractional_part) * 10f64.powf(exponent_part);
+        let value = match float.float.sign {
+            Sign::Positive => value,
+            Sign::Negative => -value,
+        };
+
+        Ok(value)
     }
 }
 
