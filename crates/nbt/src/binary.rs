@@ -1,8 +1,8 @@
 pub mod read;
 pub mod write;
 
-#[derive(Debug, Clone, Copy)]
-enum TypeTag {
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub enum TypeTag {
     EndCompound = 0,
     Int8 = 1,
     Int16 = 2,

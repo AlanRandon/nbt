@@ -49,19 +49,19 @@ pub struct Float<'src> {
     pub exponential_part: Option<(Sign, &'src [u8])>,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum Sign {
     Positive,
     Negative,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum Signedness {
     Unsigned,
     Signed,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum IntType {
     Int8,
     Int16,
@@ -69,7 +69,7 @@ pub enum IntType {
     Int64,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum FloatType {
     Float32,
     Float64,

@@ -40,7 +40,7 @@ impl<'src> Parser<'src> {
         }
     }
 
-    fn parse_variant(
+    pub fn parse_variant(
         &mut self,
         first_token: Option<SpannedToken<'src>>,
     ) -> Result<Variant<'src>, Error<'src>> {
@@ -67,6 +67,8 @@ impl<'src> Parser<'src> {
                     float,
                 })),
             },
+            Token::True => Ok(Variant::Bool(token.span, true)),
+            Token::False => Ok(Variant::Bool(token.span, false)),
             Token::Bool => self
                 .parse_operation(token.span, OperationKind::Bool)
                 .map(Box::new)
@@ -359,6 +361,7 @@ pub enum Variant<'src> {
     List(List<'src>),
     IntList(IntList<'src>),
     Operation(Box<Operation<'src>>),
+    Bool(Span, bool),
 }
 
 #[derive(Debug, Clone, PartialEq)]
