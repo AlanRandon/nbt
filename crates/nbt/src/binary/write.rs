@@ -56,7 +56,7 @@ impl Writeable for TypeTag {
 impl Variant {
     fn write_value_le(&self, writer: &mut impl Write) -> io::Result<()> {
         match self {
-            Self::Byte(value) => value.write_le(&mut *writer),
+            Self::Int8(value) => value.write_le(&mut *writer),
             Self::Int16(value) => value.write_le(&mut *writer),
             Self::Int32(value) => value.write_le(&mut *writer),
             Self::Int64(value) => value.write_le(&mut *writer),
@@ -65,7 +65,7 @@ impl Variant {
             Self::String(value) => value.write_le(&mut *writer),
             Self::List(list) => list.write_le(&mut *writer),
             Self::Compound(compound) => compound.write_le(&mut *writer),
-            Self::ByteList(list_variant) => list_variant.write_le(&mut *writer),
+            Self::Int8List(list_variant) => list_variant.write_le(&mut *writer),
             Self::Int32List(list_variant) => list_variant.write_le(&mut *writer),
             Self::Int64List(list_variant) => list_variant.write_le(&mut *writer),
         }
@@ -73,7 +73,7 @@ impl Variant {
 
     fn type_tag(&self) -> TypeTag {
         match self {
-            Self::Byte(_) => TypeTag::Byte,
+            Self::Int8(_) => TypeTag::Int8,
             Self::Int16(_) => TypeTag::Int16,
             Self::Int32(_) => TypeTag::Int32,
             Self::Int64(_) => TypeTag::Int64,
@@ -82,7 +82,7 @@ impl Variant {
             Self::String(_) => TypeTag::String,
             Self::List(_) => TypeTag::List,
             Self::Compound(_) => TypeTag::Compound,
-            Self::ByteList(_) => TypeTag::ByteList,
+            Self::Int8List(_) => TypeTag::Int8List,
             Self::Int32List(_) => TypeTag::Int32List,
             Self::Int64List(_) => TypeTag::Int64List,
         }
@@ -108,7 +108,7 @@ impl Writeable for List {
         self.type_tag().write_le(&mut *writer)?;
 
         match self {
-            List::Byte(list_variant) => list_variant.write_le(&mut *writer),
+            List::Int8(list_variant) => list_variant.write_le(&mut *writer),
             List::Int16(list_variant) => list_variant.write_le(&mut *writer),
             List::Int32(list_variant) => list_variant.write_le(&mut *writer),
             List::Int64(list_variant) => list_variant.write_le(&mut *writer),
@@ -117,7 +117,7 @@ impl Writeable for List {
             List::String(list_variant) => list_variant.write_le(&mut *writer),
             List::List(list_variant) => list_variant.write_le(&mut *writer),
             List::Compound(list_variant) => list_variant.write_le(&mut *writer),
-            List::ByteList(list_variant) => list_variant.write_le(&mut *writer),
+            List::Int8List(list_variant) => list_variant.write_le(&mut *writer),
             List::Int32List(list_variant) => list_variant.write_le(&mut *writer),
             List::Int64List(list_variant) => list_variant.write_le(&mut *writer),
             List::Empty => writer.write_all(&[0]),
@@ -128,7 +128,7 @@ impl Writeable for List {
 impl List {
     fn type_tag(&self) -> TypeTag {
         match self {
-            Self::Byte(_) => TypeTag::Byte,
+            Self::Int8(_) => TypeTag::Int8,
             Self::Int16(_) => TypeTag::Int16,
             Self::Int32(_) => TypeTag::Int32,
             Self::Int64(_) => TypeTag::Int64,
@@ -137,7 +137,7 @@ impl List {
             Self::String(_) => TypeTag::String,
             Self::List(_) => TypeTag::List,
             Self::Compound(_) => TypeTag::Compound,
-            Self::ByteList(_) => TypeTag::ByteList,
+            Self::Int8List(_) => TypeTag::Int8List,
             Self::Int32List(_) => TypeTag::Int32List,
             Self::Int64List(_) => TypeTag::Int64List,
             Self::Empty => TypeTag::EndCompound,

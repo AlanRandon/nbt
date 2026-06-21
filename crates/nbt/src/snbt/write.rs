@@ -14,7 +14,7 @@ trait IndentedDisplay {
 impl IndentedDisplay for Variant {
     fn fmt_indented(&self, f: &mut std::fmt::Formatter<'_>, indent: usize) -> std::fmt::Result {
         match self {
-            Self::Byte(value) => PrimitiveDisplay::fmt(value, f),
+            Self::Int8(value) => PrimitiveDisplay::fmt(value, f),
             Self::Int16(value) => PrimitiveDisplay::fmt(value, f),
             Self::Int32(value) => PrimitiveDisplay::fmt(value, f),
             Self::Int64(value) => PrimitiveDisplay::fmt(value, f),
@@ -23,7 +23,7 @@ impl IndentedDisplay for Variant {
             Self::String(value) => PrimitiveDisplay::fmt(value, f),
             Self::List(list) => list.fmt_indented(f, indent),
             Self::Compound(compound) => compound.fmt_indented(f, indent),
-            Self::ByteList(list_variant) => list_variant.fmt_typed_list(f),
+            Self::Int8List(list_variant) => list_variant.fmt_typed_list(f),
             Self::Int32List(list_variant) => list_variant.fmt_typed_list(f),
             Self::Int64List(list_variant) => list_variant.fmt_typed_list(f),
         }
@@ -34,7 +34,7 @@ impl IndentedDisplay for List {
     fn fmt_indented(&self, f: &mut std::fmt::Formatter<'_>, indent: usize) -> std::fmt::Result {
         match self {
             Self::Empty => write!(f, "[]"),
-            Self::Byte(list_variant) => list_variant.fmt_list(f),
+            Self::Int8(list_variant) => list_variant.fmt_list(f),
             Self::Int16(list_variant) => list_variant.fmt_list(f),
             Self::Int32(list_variant) => list_variant.fmt_list(f),
             Self::Int64(list_variant) => list_variant.fmt_list(f),
@@ -43,7 +43,7 @@ impl IndentedDisplay for List {
             Self::String(list_variant) => list_variant.fmt_list(f),
             Self::List(list_variant) => list_variant.fmt_indented(f, indent),
             Self::Compound(list_variant) => list_variant.fmt_indented(f, indent),
-            Self::ByteList(list_variant) => list_variant.fmt_indented(f, indent),
+            Self::Int8List(list_variant) => list_variant.fmt_indented(f, indent),
             Self::Int32List(list_variant) => list_variant.fmt_indented(f, indent),
             Self::Int64List(list_variant) => list_variant.fmt_indented(f, indent),
         }

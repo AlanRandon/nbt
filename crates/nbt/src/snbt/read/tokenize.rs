@@ -1,6 +1,7 @@
 use crate::snbt::read::{SourcePosition, Span};
+use std::str::Utf8Error;
 
-mod number;
+pub mod number;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Token<'src> {
@@ -23,7 +24,7 @@ pub enum Token<'src> {
     /// `,`
     Comma,
     /// `B;`
-    ByteArrayHeader,
+    Int8ArrayHeader,
     /// `I;`
     Int32ArrayHeader,
     /// `L;`
@@ -44,8 +45,8 @@ pub enum Token<'src> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SpannedToken<'src> {
-    token: Token<'src>,
-    span: Span,
+    pub token: Token<'src>,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -69,8 +70,10 @@ pub enum Error {
     UnclosedEscape(SourcePosition),
     #[error("unknown string escape at {0:?}")]
     UnknownEscape(SourcePosition),
-    #[error("invalid nubmer at {0:?}")]
+    #[error("invalid number at {0:?}")]
     InvalidNumber(SourcePosition),
+    #[error("invalid utf-8 in string at {0:?}")]
+    InvalidUtf8(SourcePosition, Utf8Error),
 }
 
 impl<'src> Tokenizer<'src> {
@@ -113,6 +116,10 @@ impl<'src> Tokenizer<'src> {
         };
 
         let token = match byte {
+            b' ' | b'\t' | b'\n' | b'\r' => {
+                self.position += 1;
+                return self.take_token();
+            }
             b'{' => Token::OpenBrace,
             b'}' => Token::CloseBrace,
             b'[' => Token::OpenBracket,
@@ -121,19 +128,38 @@ impl<'src> Tokenizer<'src> {
             b')' => Token::CloseParen,
             b':' => Token::Colon,
             b',' => Token::Comma,
-            b'B' => return self.take_unit_token(b"B;", Token::ByteArrayHeader),
+            b'B' => return self.take_unit_token(b"B;", Token::Int8ArrayHeader),
             b'I' => return self.take_unit_token(b"I;", Token::Int32ArrayHeader),
             b'L' => return self.take_unit_token(b"L;", Token::Int64ArrayHeader),
             b't' => return self.take_unit_token(b"true", Token::True),
             b'f' => return self.take_unit_token(b"false", Token::False),
             b'b' => return self.take_unit_token(b"bool", Token::Bool),
             b'u' => return self.take_unit_token(b"uuid", Token::Uuid),
-            b' ' | b'\t' | b'\n' | b'\r' => {
-                self.position += 1;
-                return self.take_token();
-            }
-            b'\"' => return self.take_string_token(),
             b'.' | b'-' | b'0'..=b'9' => return self.take_number_token(),
+            b'"' => return self.take_string_token(b'"'),
+            b'\'' => return self.take_string_token(b'\''),
+            b'a'..=b'z' | b'A'..=b'Z' | b'_' => {
+                let length = self
+                    .source
+                    .as_bytes()
+                    .get(self.position..)
+                    .unwrap()
+                    .iter()
+                    .take_while(|byte| matches!(byte, b'a'..=b'z' | b'A'..=b'Z' | b'_' | b'0'..=b'9' | b'-' | b'.' | b'+'))
+                    .count();
+
+                let content = self
+                    .source
+                    .as_bytes()
+                    .get(self.position..self.position + length)
+                    .expect("at least length bytes to remain");
+
+                let content = str::from_utf8(content).expect("found string is valid utf-8");
+
+                self.position += length;
+
+                return Ok(Token::String(vec![StringContentToken::Literal(content)]));
+            }
             _ => return Err(Error::InvalidToken(SourcePosition(self.position))),
         };
 
@@ -162,9 +188,9 @@ impl<'src> Tokenizer<'src> {
         }
     }
 
-    fn take_string_token(&mut self) -> Result<Token<'src>, Error> {
+    fn take_string_token(&mut self, quote: u8) -> Result<Token<'src>, Error> {
         let source = self.source.as_bytes();
-        assert_eq!(source[self.position], b'\"');
+        assert_eq!(source[self.position], quote);
         self.position += 1;
 
         let mut tokens = Vec::new();
@@ -173,7 +199,7 @@ impl<'src> Tokenizer<'src> {
                 .get(self.position..)
                 .expect("remainder of source in bounds of source");
 
-            let Some(end_pos) = rest.iter().position(|byte| *byte == b'\"') else {
+            let Some(end_pos) = rest.iter().position(|byte| *byte == quote) else {
                 return Err(Error::InvalidToken(SourcePosition(self.position)));
             };
 
@@ -186,17 +212,17 @@ impl<'src> Tokenizer<'src> {
                     .get(0..end_pos)
                     .expect("backslash found in remaining source");
 
-                tokens.push(StringContentToken::Literal(
-                    str::from_utf8(rest).expect("string before backslash is valid utf-8"),
-                ));
+                tokens.push(StringContentToken::Literal(str::from_utf8(rest).map_err(
+                    |err| Error::InvalidUtf8(SourcePosition(self.position), err),
+                )?));
 
                 self.position += rest.len() + 1;
 
                 tokens.push(self.take_string_escape()?);
             } else {
-                tokens.push(StringContentToken::Literal(
-                    str::from_utf8(rest).expect("string before backslash is valid utf-8"),
-                ));
+                tokens.push(StringContentToken::Literal(str::from_utf8(rest).map_err(
+                    |err| Error::InvalidUtf8(SourcePosition(self.position), err),
+                )?));
 
                 self.position += rest.len() + 1;
 
@@ -237,8 +263,8 @@ impl<'src> Tokenizer<'src> {
 
 #[test]
 fn tokenize_snbt() {
-    let mut tokenizer = Tokenizer::new("B; true , \n :, \t 0b01010uB \"abc\"\"def\\nghi\":");
-    assert_eq!(tokenizer.take_token().unwrap(), Token::ByteArrayHeader);
+    let mut tokenizer = Tokenizer::new("B; true , \n :, \t 0b01010uB \"abc\"\"def\\nghi\": a+b [");
+    assert_eq!(tokenizer.take_token().unwrap(), Token::Int8ArrayHeader);
     assert_eq!(tokenizer.take_token().unwrap(), Token::True);
     assert_eq!(tokenizer.take_token().unwrap(), Token::Comma);
     assert_eq!(tokenizer.take_token().unwrap(), Token::Colon);
@@ -248,7 +274,7 @@ fn tokenize_snbt() {
         Token::Number(number::Number::Int(number::Int {
             sign: number::Sign::Positive,
             signedness: number::Signedness::Unsigned,
-            r#type: number::IntType::Byte,
+            r#type: number::IntType::Int8,
             digits: number::IntBytes::Binary(b"01010"),
         }))
     );
@@ -265,5 +291,10 @@ fn tokenize_snbt() {
         ])
     );
     assert_eq!(tokenizer.take_token().unwrap(), Token::Colon);
+    assert_eq!(
+        tokenizer.take_token().unwrap(),
+        Token::String(vec![StringContentToken::Literal("a+b")])
+    );
+    assert_eq!(tokenizer.take_token().unwrap(), Token::OpenBracket);
     assert_eq!(tokenizer.take_token().unwrap(), Token::Eof);
 }

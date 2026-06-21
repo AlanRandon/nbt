@@ -7,7 +7,7 @@ pub mod snbt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Variant {
-    Byte(u8),
+    Int8(u8),
     Int16(u16),
     Int32(u32),
     Int64(u64),
@@ -16,14 +16,14 @@ pub enum Variant {
     String(String),
     List(List),
     Compound(Compound),
-    ByteList(ListVariant<u8>),
+    Int8List(ListVariant<u8>),
     Int32List(ListVariant<u32>),
     Int64List(ListVariant<u64>),
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum List {
-    Byte(ListVariant<u8>),
+    Int8(ListVariant<u8>),
     Int16(ListVariant<u16>),
     Int32(ListVariant<u32>),
     Int64(ListVariant<u64>),
@@ -32,7 +32,7 @@ pub enum List {
     String(ListVariant<String>),
     List(ListVariant<List>),
     Compound(ListVariant<Compound>),
-    ByteList(ListVariant<ListVariant<u8>>),
+    Int8List(ListVariant<ListVariant<u8>>),
     Int32List(ListVariant<ListVariant<u32>>),
     Int64List(ListVariant<ListVariant<u64>>),
     Empty,

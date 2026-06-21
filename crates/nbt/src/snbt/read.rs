@@ -1,3 +1,4 @@
+pub mod parse;
 pub mod tokenize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

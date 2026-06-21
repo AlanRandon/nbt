@@ -71,14 +71,14 @@ impl Readable for Option<NamedTag> {
 
 fn read_tag(reader: &mut impl Read, tag: TypeTag) -> Result<Variant, ReadError> {
     let variant = match tag {
-        TypeTag::Byte => u8::read_le(reader).map(Variant::Byte)?,
+        TypeTag::Int8 => u8::read_le(reader).map(Variant::Int8)?,
         TypeTag::Int16 => u16::read_le(reader).map(Variant::Int16)?,
         TypeTag::Int32 => u32::read_le(reader).map(Variant::Int32)?,
         TypeTag::Int64 => u64::read_le(reader).map(Variant::Int64)?,
         TypeTag::Float32 => f32::read_le(reader).map(Variant::Float32)?,
         TypeTag::Float64 => f64::read_le(reader).map(Variant::Float64)?,
         TypeTag::String => String::read_le(reader).map(Variant::String)?,
-        TypeTag::ByteList => ListVariant::read_le(reader).map(Variant::ByteList)?,
+        TypeTag::Int8List => ListVariant::read_le(reader).map(Variant::Int8List)?,
         TypeTag::List => List::read_le(reader).map(Variant::List)?,
         TypeTag::Compound => Compound::read_le(reader).map(Variant::Compound)?,
         TypeTag::Int32List => ListVariant::read_le(reader).map(Variant::Int32List)?,
@@ -114,14 +114,14 @@ impl Readable for List {
         let tag = u8::read_le(&mut *reader)?;
         let tag = tag.try_into()?;
         let list = match tag {
-            TypeTag::Byte => ListVariant::read_le(reader).map(List::Byte)?,
+            TypeTag::Int8 => ListVariant::read_le(reader).map(List::Int8)?,
             TypeTag::Int16 => ListVariant::read_le(reader).map(List::Int16)?,
             TypeTag::Int32 => ListVariant::read_le(reader).map(List::Int32)?,
             TypeTag::Int64 => ListVariant::read_le(reader).map(List::Int64)?,
             TypeTag::Float32 => ListVariant::read_le(reader).map(List::Float32)?,
             TypeTag::Float64 => ListVariant::read_le(reader).map(List::Float64)?,
             TypeTag::String => ListVariant::read_le(reader).map(List::String)?,
-            TypeTag::ByteList => ListVariant::read_le(reader).map(List::ByteList)?,
+            TypeTag::Int8List => ListVariant::read_le(reader).map(List::Int8List)?,
             TypeTag::List => ListVariant::read_le(reader).map(List::List)?,
             TypeTag::Compound => ListVariant::read_le(reader).map(List::Compound)?,
             TypeTag::Int32List => ListVariant::read_le(reader).map(List::Int32List)?,

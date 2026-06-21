@@ -63,7 +63,7 @@ pub enum Signedness {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum IntType {
-    Byte,
+    Int8,
     Int16,
     Int32,
     Int64,
@@ -195,7 +195,7 @@ impl<'src> NumberParser<'src> {
             };
 
             let ty = match ty {
-                b'b' | b'B' => Some(IntType::Byte),
+                b'b' | b'B' => Some(IntType::Int8),
                 b's' | b'S' => Some(IntType::Int16),
                 b'i' | b'I' => Some(IntType::Int32),
                 b'l' | b'L' => Some(IntType::Int64),
@@ -209,7 +209,7 @@ impl<'src> NumberParser<'src> {
         }
 
         match self.source.get(self.position).and_then(|byte| match byte {
-            b'b' | b'B' => Some(IntType::Byte),
+            b'b' | b'B' => Some(IntType::Int8),
             b's' | b'S' => Some(IntType::Int16),
             b'i' | b'I' => Some(IntType::Int32),
             b'l' | b'L' => Some(IntType::Int64),
@@ -464,7 +464,7 @@ fn take_number() {
             b"-16b",
             Number::Int(Int {
                 sign: Sign::Negative,
-                r#type: IntType::Byte,
+                r#type: IntType::Int8,
                 signedness: Signedness::Signed,
                 digits: IntBytes::Denary(b"16"),
             }),
@@ -473,7 +473,7 @@ fn take_number() {
             b"-16sb",
             Number::Int(Int {
                 sign: Sign::Negative,
-                r#type: IntType::Byte,
+                r#type: IntType::Int8,
                 signedness: Signedness::Signed,
                 digits: IntBytes::Denary(b"16"),
             }),
@@ -482,7 +482,7 @@ fn take_number() {
             b"240uB",
             Number::Int(Int {
                 sign: Sign::Positive,
-                r#type: IntType::Byte,
+                r#type: IntType::Int8,
                 signedness: Signedness::Unsigned,
                 digits: IntBytes::Denary(b"240"),
             }),
