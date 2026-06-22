@@ -14,6 +14,7 @@ fn parse_and_convert_variant() {
 
     for (source, expected_variant) in [
         ("0xDEADBEEFL", Variant::Int64(0xDEADBEEF)),
+        ("0f", Variant::Float32(0.)),
         ("-42e10f", Variant::Float32(-42e10)),
         (
             "\"Hello\\tworld!\"",

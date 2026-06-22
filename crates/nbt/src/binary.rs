@@ -47,20 +47,39 @@ impl TryFrom<u8> for TypeTag {
 
 #[test]
 fn roundtrip_encoding_structure() {
-    use crate::BedrockNbtFile;
+    use crate::{BedrockNbtFile, List, NamedTag, Variant};
     use bytes::{Buf, BufMut};
     use write::Writeable;
 
-    let bytes = include_bytes!("../tests/crossbow_piglin.mcstructure");
-    let mut reader = bytes.reader();
-    let structure = BedrockNbtFile::read_le_without_header(&mut reader).unwrap();
+    for structure in [
+        BedrockNbtFile {
+            header: None,
+            tag: NamedTag(String::new(), Variant::List(List::Empty)),
+        },
+        {
+            let parser =
+                crate::snbt::read::parse::Parser::new(include_str!("../tests/structure.snbt"));
+            let variant = parser.parse_variant_and_finish().unwrap();
+            let variant = variant.try_into().unwrap();
+            BedrockNbtFile {
+                header: None,
+                tag: NamedTag(String::new(), variant),
+            }
+        },
+        {
+            let bytes = include_bytes!("../tests/crossbow_piglin.mcstructure");
+            let mut reader = bytes.reader();
+            BedrockNbtFile::read_le_without_header(&mut reader).unwrap()
+        },
+    ] {
+        let mut writer = Vec::new().writer();
+        structure.write_le(&mut writer).unwrap();
+        let bytes = writer.into_inner();
 
-    let mut writer = Vec::new().writer();
-    structure.write_le(&mut writer).unwrap();
-    let bytes = writer.into_inner();
+        let mut reader = bytes.reader();
+        let roundtrip_encoded_structure =
+            BedrockNbtFile::read_le_without_header(&mut reader).unwrap();
 
-    let mut reader = bytes.reader();
-    let roundtrip_encoded_structure = BedrockNbtFile::read_le_without_header(&mut reader).unwrap();
-
-    assert_eq!(structure, roundtrip_encoded_structure);
+        assert_eq!(structure, roundtrip_encoded_structure);
+    }
 }

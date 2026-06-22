@@ -119,7 +119,10 @@ impl Writeable for List {
             List::Int8List(list_variant) => list_variant.write_le(&mut *writer),
             List::Int32List(list_variant) => list_variant.write_le(&mut *writer),
             List::Int64List(list_variant) => list_variant.write_le(&mut *writer),
-            List::Empty => writer.write_all(&[0]),
+            List::Empty => {
+                u32::write_le(&0, &mut *writer)?;
+                Ok(())
+            }
         }
     }
 }
@@ -146,11 +149,9 @@ impl List {
 
 impl<T: Writeable> Writeable for ListVariant<T> {
     fn write_le(&self, writer: &mut impl Write) -> io::Result<()> {
-        writer.write_all(
-            &u32::try_from(self.0.len())
-                .map_err(io::Error::other)?
-                .to_le_bytes(),
-        )?;
+        u32::try_from(self.0.len())
+            .map_err(io::Error::other)?
+            .write_le(&mut *writer)?;
 
         for item in &self.0 {
             item.write_le(&mut *writer)?;

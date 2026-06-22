@@ -1,0 +1,272 @@
+{
+	"format_version": 1uI,
+	"size": [1uI, 3uI, 1uI],
+	"structure": {
+		"entities": [
+			{
+				"Air": 300uS,
+				"Armor": [
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"WasPickedUp": 0uB
+					}
+				],
+				"AttackTime": 0uS,
+				"Attributes": [
+					{
+						"Base": 0f,
+						"Current": 0f,
+						"Max": 1024f,
+						"Name": "minecraft:luck"
+					},
+					{
+						"Base": 16f,
+						"Current": 16f,
+						"Max": 16f,
+						"Name": "minecraft:health"
+					},
+					{
+						"Base": 0f,
+						"Current": 0f,
+						"Max": 16f,
+						"Name": "minecraft:absorption"
+					},
+					{
+						"Base": 0f,
+						"Current": 0f,
+						"Max": 1f,
+						"Name": "minecraft:knockback_resistance"
+					},
+					{
+						"Base": 0.35f,
+						"Current": 0.35f,
+						"Max": 340282350000000000000000000000000000000f,
+						"Name": "minecraft:movement"
+					},
+					{
+						"Base": 0.02f,
+						"Current": 0.02f,
+						"Max": 340282350000000000000000000000000000000f,
+						"Name": "minecraft:underwater_movement"
+					},
+					{
+						"Base": 0.02f,
+						"Current": 0.02f,
+						"Max": 340282350000000000000000000000000000000f,
+						"Name": "minecraft:lava_movement"
+					},
+					{
+						"Base": 64f,
+						"Current": 64f,
+						"Max": 2048f,
+						"Name": "minecraft:follow_range"
+					}
+				],
+				"BodyRot": -89.468994f,
+				"ChestItems": [
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"Slot": 0uB,
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"Slot": 1uB,
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"Slot": 2uB,
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"Slot": 3uB,
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"Slot": 4uB,
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"Slot": 5uB,
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"Slot": 6uB,
+						"WasPickedUp": 0uB
+					},
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"Slot": 7uB,
+						"WasPickedUp": 0uB
+					}
+				],
+				"Chested": 0uB,
+				"Color": 0uB,
+				"Color2": 0uB,
+				"Dead": 0uB,
+				"DeathTime": 0uS,
+				"FallDistance": 0f,
+				"Fire": 0uS,
+				"HurtTime": 0uS,
+				"InventoryVersion": "1.16.0",
+				"Invulnerable": 0uB,
+				"IsAngry": 0uB,
+				"IsAutonomous": 0uB,
+				"IsBaby": 0uB,
+				"IsEating": 0uB,
+				"IsGliding": 0uB,
+				"IsGlobal": 0uB,
+				"IsIllagerCaptain": 0uB,
+				"IsOrphaned": 0uB,
+				"IsPregnant": 0uB,
+				"IsRoaring": 0uB,
+				"IsScared": 0uB,
+				"IsStunned": 0uB,
+				"IsSwimming": 0uB,
+				"IsTamed": 0uB,
+				"IsTrusting": 0uB,
+				"ItemInHand": {
+					"Count": 1uB,
+					"Damage": 0uS,
+					"Name": "minecraft:crossbow",
+					"WasPickedUp": 0uB,
+					"tag": {
+						"Damage": 0uI
+					}
+				},
+				"LastDimensionId": 1uI,
+				"LeasherID": 18446744073709551615uL,
+				"LootDropped": 0uB,
+				"Mainhand": [
+					{
+						"Count": 1uB,
+						"Damage": 0uS,
+						"Name": "minecraft:crossbow",
+						"WasPickedUp": 0uB,
+						"tag": {
+							"Damage": 0uI
+						}
+					}
+				],
+				"MarkVariant": 0uI,
+				"NaturalSpawn": 0uB,
+				"Offhand": [
+					{
+						"Count": 0uB,
+						"Damage": 0uS,
+						"Name": "",
+						"WasPickedUp": 0uB
+					}
+				],
+				"OnGround": 1uB,
+				"OwnerNew": 18446744073709551615uL,
+				"Persistent": 1uB,
+				"PortalCooldown": 0uI,
+				"Pos": [-11.395691f, 41f, -10.44698f],
+				"Rotation": [0f, 38.0672f],
+				"Saddled": 0uB,
+				"Sheared": 0uB,
+				"ShowBottom": 0uB,
+				"Sitting": 0uB,
+				"SkinID": 0uI,
+				"SpawnedByNight": 0uB,
+				"Strength": 0uI,
+				"StrengthMax": 0uI,
+				"Surface": 0uB,
+				"Tags": [],
+				"TargetID": 18446744073709551615uL,
+				"TradeExperience": 0uI,
+				"TradeTier": 0uI,
+				"UniqueID": 18446744060824649760uL,
+				"Variant": 0uI,
+				"boundX": 0uI,
+				"boundY": 0uI,
+				"boundZ": 0uI,
+				"canPickupItems": 1uB,
+				"definitions": ["+minecraft:piglin", "+piglin_adult", "+zombification_sensor", "+alert_for_attack_targets", "+ranged_unit", "+not_hunter", "-attack_cooldown"],
+				"hasBoundOrigin": 0uB,
+				"hasSetCanPickupItems": 1uB,
+				"identifier": "minecraft:piglin",
+				"limitedLife": 0uI
+			}
+		],
+		"palette": {
+			"default": {
+				"block_palette": [
+					{
+						"name": "minecraft:jigsaw",
+						"states": {
+							"facing_direction": 0uI,
+							"rotation": 3uI
+						},
+						"version": 17825804uI
+					},
+					{
+						"name": "minecraft:air",
+						"states": {
+						},
+						"version": 17825804uI
+					}
+				],
+				"block_position_data": {
+					"0": {
+						"block_entity_data": {
+							"final_state": "minecraft:blackstone_bricks",
+							"id": "JigsawBlock",
+							"isMovable": 1uB,
+							"joint": "rollable",
+							"name": "minecraft:mob_connector",
+							"target": "minecraft:empty",
+							"target_pool": "minecraft:empty",
+							"x": 4294967284uI,
+							"y": 40uI,
+							"z": 4294967285uI
+						}
+					}
+				}
+			}
+		}
+	},
+	"structure_world_origin": [4294967284uI, 40uI, 4294967285uI]
+}

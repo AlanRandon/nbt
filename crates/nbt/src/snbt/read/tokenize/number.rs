@@ -135,6 +135,10 @@ impl<'src> NumberParser<'src> {
 
             let exponent_part = self.take_optional_exponent_part();
             is_float |= exponent_part.is_some();
+            is_float |= matches!(
+                self.source.get(self.position),
+                Some(b'f' | b'F' | b'd' | b'D')
+            );
 
             if is_float {
                 let r#type = self.take_float_type();

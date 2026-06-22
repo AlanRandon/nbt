@@ -73,6 +73,7 @@ fn main() {
             };
 
             file.write_le(&mut output).unwrap();
+            output.flush().unwrap();
         }
     }
 }

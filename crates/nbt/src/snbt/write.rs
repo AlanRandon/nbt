@@ -75,23 +75,25 @@ impl IndentedDisplay for Compound {
 }
 
 pub trait TypeSymbol {
-    const TYPE_SYMBOLS: &[char];
+    const TYPE_SYMBOL: &str;
+    const ARRAY_SYMBOL: char;
 }
 
 macro_rules! impl_type_symbol {
-    ($T:ty, $symbols:expr) => {
+    ($T:ty, $symbol:expr, $array_symbol:expr) => {
         impl TypeSymbol for $T {
-            const TYPE_SYMBOLS: &[char] = $symbols;
+            const TYPE_SYMBOL: &str = $symbol;
+            const ARRAY_SYMBOL: char = $array_symbol;
         }
     };
 }
 
-impl_type_symbol!(u8, &['b', 'B']);
-impl_type_symbol!(u16, &['s', 'S']);
-impl_type_symbol!(u32, &['i', 'I']);
-impl_type_symbol!(u64, &['l', 'L']);
-impl_type_symbol!(f32, &['f', 'F']);
-impl_type_symbol!(f64, &['d', 'D']);
+impl_type_symbol!(u8, "uB", 'B');
+impl_type_symbol!(u16, "uS", 'S');
+impl_type_symbol!(u32, "uI", 'I');
+impl_type_symbol!(u64, "uL", 'L');
+impl_type_symbol!(f32, "f", 'F');
+impl_type_symbol!(f64, "d", 'D');
 
 pub trait PrimitiveDisplay {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result;
@@ -99,7 +101,7 @@ pub trait PrimitiveDisplay {
 
 impl<T: TypeSymbol + Display> PrimitiveDisplay for T {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}", self, T::TYPE_SYMBOLS[0])
+        write!(f, "{}{}", self, T::TYPE_SYMBOL)
     }
 }
 
@@ -111,7 +113,7 @@ impl PrimitiveDisplay for String {
 
 impl<T: TypeSymbol + Display> ListVariant<T> {
     fn fmt_typed_list(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}, ", T::TYPE_SYMBOLS[0])?;
+        write!(f, "[{}; ", T::ARRAY_SYMBOL)?;
         for (index, item) in self.0.iter().enumerate() {
             item.fmt(f)?;
             if index < self.0.len().saturating_sub(1) {

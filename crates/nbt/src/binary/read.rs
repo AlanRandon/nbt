@@ -126,7 +126,10 @@ impl Readable for List {
             TypeTag::Compound => ListVariant::read_le(reader).map(List::Compound)?,
             TypeTag::Int32List => ListVariant::read_le(reader).map(List::Int32List)?,
             TypeTag::Int64List => ListVariant::read_le(reader).map(List::Int64List)?,
-            TypeTag::EndCompound => List::Empty,
+            TypeTag::EndCompound => {
+                let _length = u32::read_le(&mut *reader)?;
+                List::Empty
+            }
         };
 
         Ok(list)

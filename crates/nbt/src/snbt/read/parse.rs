@@ -249,8 +249,6 @@ impl<'src> Parser<'src> {
                 return Err(Error::MissingCompoundComma(start, token));
             }
 
-            dbg!();
-
             let key = match self.parse_variant(Some(token))? {
                 Variant::String(string) => string,
                 key => return Err(Error::NonStringKey(start, key)),
