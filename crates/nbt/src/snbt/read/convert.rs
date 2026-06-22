@@ -1,9 +1,11 @@
+use itertools::Itertools;
+
 use crate::binary::TypeTag;
 use crate::snbt::read::parse::{ListHeaderKind, OperationKind};
 use crate::snbt::read::tokenize::StringContentToken;
 use crate::snbt::read::tokenize::number::{FloatType, IntType};
 use crate::snbt::read::{Span, parse};
-use crate::{Compound, Variant};
+use crate::{Compound, ListVariant, Variant};
 use std::collections::{BTreeMap, HashSet};
 
 mod list;
@@ -37,6 +39,33 @@ pub enum Error<'src> {
         float: parse::SpannedFloat<'src>,
         result_type: FloatType,
     },
+    #[error("error parsing arguments for operation")]
+    ArgumentError {
+        operation_span: Span,
+        operation_kind_span: Span,
+        error: Box<Error<'src>>,
+    },
+    #[error("arity error")]
+    OperationArityError {
+        operation_span: Span,
+        operation_kind: OperationKind,
+        operation_kind_span: Span,
+        expected_arity: usize,
+        found_arity: usize,
+    },
+    #[error("type error")]
+    OperationTypeError {
+        operation_span: Span,
+        operation_kind: OperationKind,
+        operation_kind_span: Span,
+        arguments: Vec<Variant>,
+    },
+    #[error("invalid uuid")]
+    ParseUuidError {
+        operation_span: Span,
+        operation_kind_span: Span,
+        error: uuid::Error,
+    },
 }
 
 impl<'src> TryFrom<parse::Variant<'src>> for Variant {
@@ -65,7 +94,7 @@ impl<'src> TryFrom<parse::SpannedString<'src>> for String {
             match token {
                 StringContentToken::Literal(content) => result.push_str(content),
                 StringContentToken::Escaped(ch) => result.push(ch),
-                StringContentToken::Named(_) => todo!(),
+                StringContentToken::Named(_) => todo!("handle named escapes"),
             }
         }
         Ok(result)
@@ -111,7 +140,74 @@ impl<'src> TryFrom<parse::Operation<'src>> for Variant {
     type Error = Error<'src>;
 
     fn try_from(operation: parse::Operation<'src>) -> Result<Self, Self::Error> {
-        todo!()
+        let arguments = operation
+            .arguments
+            .into_iter()
+            .map(Variant::try_from)
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| Error::ArgumentError {
+                operation_span: operation.span,
+                operation_kind_span: operation.kind_span,
+                error: Box::new(error),
+            })?;
+
+        match (operation.kind, arguments.get(..)) {
+            (OperationKind::Bool | OperationKind::Uuid, Some([argument])) => {
+                match (operation.kind, argument) {
+                    (OperationKind::Bool, Variant::Int8(integer)) => {
+                        Ok(Variant::Int8(if *integer == 0 { 0 } else { 1 }))
+                    }
+                    (OperationKind::Bool, Variant::Int16(integer)) => {
+                        Ok(Variant::Int8(if *integer == 0 { 0 } else { 1 }))
+                    }
+                    (OperationKind::Bool, Variant::Int32(integer)) => {
+                        Ok(Variant::Int8(if *integer == 0 { 0 } else { 1 }))
+                    }
+                    (OperationKind::Bool, Variant::Int64(integer)) => {
+                        Ok(Variant::Int8(if *integer == 0 { 0 } else { 1 }))
+                    }
+                    (OperationKind::Uuid, Variant::String(string)) => {
+                        let uuid = uuid::Uuid::try_parse(string).map_err(|error| {
+                            Error::ParseUuidError {
+                                operation_span: operation.span,
+                                operation_kind_span: operation.kind_span,
+                                error,
+                            }
+                        })?;
+
+                        let integers = uuid
+                            .into_bytes()
+                            .iter()
+                            .chunks(4)
+                            .into_iter()
+                            .map(|mut chunk| {
+                                let array = chunk.next_array().unwrap();
+                                assert_eq!(chunk.next(), None);
+                                let [a, b, c, d] = array.map(|byte| u32::from(*byte));
+
+                                a * 0x100_0000 + b * 0x1_0000 + c * 0x100 + d
+                            })
+                            .next_array::<4>()
+                            .unwrap();
+
+                        Ok(Variant::Int32List(ListVariant(integers.to_vec())))
+                    }
+                    _ => Err(Error::OperationTypeError {
+                        operation_span: operation.span,
+                        operation_kind: operation.kind,
+                        operation_kind_span: operation.kind_span,
+                        arguments,
+                    }),
+                }
+            }
+            _ => Err(Error::OperationArityError {
+                operation_span: operation.span,
+                operation_kind: operation.kind,
+                operation_kind_span: operation.kind_span,
+                expected_arity: 1,
+                found_arity: arguments.len(),
+            }),
+        }
     }
 }
 

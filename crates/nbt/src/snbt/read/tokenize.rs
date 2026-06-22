@@ -1,4 +1,5 @@
 use crate::snbt::read::{SourcePosition, Span};
+use std::char::CharTryFromError;
 use std::str::Utf8Error;
 
 pub mod number;
@@ -70,6 +71,10 @@ pub enum Error {
     UnclosedEscape(SourcePosition),
     #[error("unknown string escape at {0:?}")]
     UnknownEscape(SourcePosition),
+    #[error("escape contains non-digits at {0:?}")]
+    EscapeNonDigits(SourcePosition),
+    #[error("escape contains invalid character at {0:?}")]
+    InvalidEscapeChar(SourcePosition, CharTryFromError),
     #[error("invalid number at {0:?}")]
     InvalidNumber(SourcePosition),
     #[error("invalid utf-8 in string at {0:?}")]
@@ -248,10 +253,91 @@ impl<'src> Tokenizer<'src> {
             b'\\' => StringContentToken::Escaped('\\'),
             b'\'' => StringContentToken::Escaped('\''),
             b'"' => StringContentToken::Escaped('"'),
-            b'x' => todo!(),
-            b'u' => todo!(),
-            b'U' => todo!(),
-            b'N' => todo!(),
+            b'x' => match self.source.as_bytes().get(self.position + 1..) {
+                Some([a @ b'0'..=b'9', b @ b'0'..=b'9', ..]) => {
+                    self.position += 3;
+                    return Ok(StringContentToken::Escaped(char::from(
+                        (a - b'0') * 0x10 + (b - b'0'),
+                    )));
+                }
+                Some([_, _]) => return Err(Error::EscapeNonDigits(SourcePosition(self.position))),
+                _ => return Err(Error::UnclosedEscape(SourcePosition(self.position))),
+            },
+            b'u' => match self.source.as_bytes().get(self.position + 1..) {
+                Some(
+                    [
+                        a @ b'0'..=b'9',
+                        b @ b'0'..=b'9',
+                        c @ b'0'..=b'9',
+                        d @ b'0'..=b'9',
+                        ..,
+                    ],
+                ) => {
+                    let ch = char::try_from(
+                        u32::from(a - b'0') * 0x1000
+                            + u32::from(b - b'0') * 0x100
+                            + u32::from(c - b'0') * 0x10
+                            + u32::from(d - b'0'),
+                    )
+                    .map_err(|err| Error::InvalidEscapeChar(SourcePosition(self.position), err))?;
+
+                    self.position += 5;
+                    return Ok(StringContentToken::Escaped(ch));
+                }
+                Some([_, _, _, _]) => {
+                    return Err(Error::EscapeNonDigits(SourcePosition(self.position)));
+                }
+                _ => return Err(Error::UnclosedEscape(SourcePosition(self.position))),
+            },
+            b'U' => match self.source.as_bytes().get(self.position + 1..) {
+                Some(
+                    [
+                        a @ b'0'..=b'9',
+                        b @ b'0'..=b'9',
+                        c @ b'0'..=b'9',
+                        d @ b'0'..=b'9',
+                        e @ b'0'..=b'9',
+                        f @ b'0'..=b'9',
+                        g @ b'0'..=b'9',
+                        h @ b'0'..=b'9',
+                        ..,
+                    ],
+                ) => {
+                    let ch = char::try_from(
+                        u32::from(a - b'0') * 0x1000_0000
+                            + u32::from(b - b'0') * 0x100_0000
+                            + u32::from(c - b'0') * 0x10_0000
+                            + u32::from(d - b'0') * 0x1_0000
+                            + u32::from(e - b'0') * 0x1000
+                            + u32::from(f - b'0') * 0x100
+                            + u32::from(g - b'0') * 0x10
+                            + u32::from(h - b'0'),
+                    )
+                    .map_err(|err| Error::InvalidEscapeChar(SourcePosition(self.position), err))?;
+
+                    self.position += 5;
+                    return Ok(StringContentToken::Escaped(ch));
+                }
+                Some([_, _, _, _]) => {
+                    return Err(Error::EscapeNonDigits(SourcePosition(self.position)));
+                }
+                _ => return Err(Error::UnclosedEscape(SourcePosition(self.position))),
+            },
+            b'N' => match self.source.as_bytes().get(self.position + 1..) {
+                Some([b'{', rest @ ..]) => {
+                    if let Some(close_pos) = rest.iter().position(|byte| *byte == b'}') {
+                        let name = rest.get(..close_pos).expect("string to exist up to close");
+                        let name = str::from_utf8(name).map_err(|err| {
+                            Error::InvalidUtf8(SourcePosition(self.position), err)
+                        })?;
+                        self.position += 2 + close_pos;
+                        return Ok(StringContentToken::Named(name));
+                    } else {
+                        return Err(Error::UnclosedEscape(SourcePosition(self.position)));
+                    }
+                }
+                _ => return Err(Error::UnclosedEscape(SourcePosition(self.position))),
+            },
             _ => return Err(Error::UnknownEscape(SourcePosition(self.position))),
         };
 

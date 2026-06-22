@@ -421,7 +421,7 @@ pub struct Operation<'src> {
     pub arguments: Vec<Variant<'src>>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OperationKind {
     Uuid,
     Bool,

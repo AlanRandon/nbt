@@ -10,7 +10,7 @@ pub struct Span(std::range::Range<SourcePosition>);
 
 #[test]
 fn parse_and_convert_variant() {
-    use crate::Variant;
+    use crate::{ListVariant, Variant};
 
     for (source, expected_variant) in [
         ("0xDEADBEEFL", Variant::Int64(0xDEADBEEF)),
@@ -20,6 +20,15 @@ fn parse_and_convert_variant() {
             Variant::String("Hello\tworld!".to_string()),
         ),
         ("bool(1L)", Variant::Int8(1)),
+        (
+            "uuid(\"f81d4fae-7dec-11d0-a765-00a0c91e6bf6\")",
+            Variant::Int32List(ListVariant(vec![
+                (-132296786i32).cast_unsigned(),
+                2112623056,
+                (-1486552928i32).cast_unsigned(),
+                (-920753162i32).cast_unsigned(),
+            ])),
+        ),
     ] {
         let parser = parse::Parser::new(source);
         let parser_variant = parser.parse_variant_and_finish().unwrap();
