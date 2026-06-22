@@ -45,7 +45,7 @@ pub struct ListVariant<T>(pub Vec<T>);
 pub struct Compound(pub BTreeMap<String, Variant>);
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct NamedTag(String, Variant);
+pub struct NamedTag(pub String, pub Variant);
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct BedrockHeader {

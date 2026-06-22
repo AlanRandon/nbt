@@ -1,6 +1,5 @@
-use crate::{
-    BedrockHeader, BedrockNbtFile, Compound, List, ListVariant, NamedTag, Variant, binary::TypeTag,
-};
+use crate::binary::TypeTag;
+use crate::{BedrockHeader, BedrockNbtFile, Compound, List, ListVariant, NamedTag, Variant};
 use std::io::{self, Write};
 
 pub trait Writeable {
