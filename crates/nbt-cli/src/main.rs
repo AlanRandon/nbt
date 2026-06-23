@@ -1,7 +1,8 @@
 use clap::Parser as _;
 use clap_file::{Input, Output};
-use nbt::binary::read::Readable;
-use nbt::binary::write::Writeable as _;
+use nbt::binary::Endianness;
+use nbt::binary::read::ReadNbt;
+use nbt::binary::write::WriteNbt;
 use std::io::{Read, Write};
 
 #[derive(clap::Parser)]
@@ -42,11 +43,12 @@ fn main() {
             header,
         } => {
             if header {
-                let header = nbt::BedrockHeader::read_le(&mut input);
+                let header = nbt::BedrockHeader::read_nbt(&mut input, Endianness::Little);
                 eprintln!("{header:?}");
             };
 
-            let nbt::NamedTag(key, value) = nbt::NamedTag::read_le(&mut input).unwrap();
+            let nbt::NamedTag(key, value) =
+                nbt::NamedTag::read_nbt(&mut input, Endianness::Little).unwrap();
             if key != "" {
                 todo!()
             }
@@ -69,18 +71,18 @@ fn main() {
 
             if header {
                 let mut payload = Vec::new();
-                nbt.write_le(&mut payload);
+                nbt.write_nbt(&mut payload, Endianness::Little).unwrap();
                 let payload = payload;
                 let header = nbt::BedrockHeader {
                     version: header_version,
                     size: payload.len().try_into().unwrap(),
                 };
 
-                header.write_le(&mut output).unwrap();
+                header.write_nbt(&mut output, Endianness::Little).unwrap();
                 output.write_all(&payload).unwrap();
                 output.flush().unwrap();
             } else {
-                nbt.write_le(&mut output).unwrap();
+                nbt.write_nbt(&mut output, Endianness::Little).unwrap();
                 output.flush().unwrap();
             }
         }
