@@ -1,5 +1,6 @@
 use clap::Parser as _;
 use clap_file::{Input, Output};
+use nbt::binary::read::Readable;
 use nbt::binary::write::Writeable as _;
 use std::io::{Read, Write};
 
@@ -27,6 +28,8 @@ enum Subcommand {
         output: Output,
         #[arg(long)]
         header: bool,
+        #[arg(long, default_value = "10")]
+        header_version: u32,
     },
 }
 
@@ -38,14 +41,12 @@ fn main() {
             mut output,
             header,
         } => {
-            let nbt = if header {
-                nbt::BedrockNbtFile::read_le_with_header(&mut input)
-            } else {
-                nbt::BedrockNbtFile::read_le_without_header(&mut input)
-            }
-            .unwrap();
+            if header {
+                let header = nbt::BedrockHeader::read_le(&mut input);
+                eprintln!("{header:?}");
+            };
 
-            let nbt::NamedTag(key, value) = nbt.tag;
+            let nbt::NamedTag(key, value) = nbt::NamedTag::read_le(&mut input).unwrap();
             if key != "" {
                 todo!()
             }
@@ -57,23 +58,31 @@ fn main() {
             mut input,
             mut output,
             header,
+            header_version,
         } => {
             let mut source = String::new();
             input.read_to_string(&mut source).unwrap();
             let parser = nbt::snbt::read::parse::Parser::new(&mut source);
             let nbt = parser.parse_variant_and_finish().unwrap();
             let nbt = nbt::Variant::try_from(nbt).unwrap();
+            let nbt = nbt::NamedTag(String::new(), nbt);
 
-            let file = nbt::BedrockNbtFile {
-                header: header.then_some(nbt::BedrockHeader {
-                    version: 8,
-                    size: 0,
-                }),
-                tag: nbt::NamedTag(String::new(), nbt),
-            };
+            if header {
+                let mut payload = Vec::new();
+                nbt.write_le(&mut payload);
+                let payload = payload;
+                let header = nbt::BedrockHeader {
+                    version: header_version,
+                    size: payload.len().try_into().unwrap(),
+                };
 
-            file.write_le(&mut output).unwrap();
-            output.flush().unwrap();
+                header.write_le(&mut output).unwrap();
+                output.write_all(&payload).unwrap();
+                output.flush().unwrap();
+            } else {
+                nbt.write_le(&mut output).unwrap();
+                output.flush().unwrap();
+            }
         }
     }
 }

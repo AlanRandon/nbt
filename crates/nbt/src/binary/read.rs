@@ -1,5 +1,5 @@
 use crate::binary::{TypeTag, UnknownTagError};
-use crate::{BedrockHeader, BedrockNbtFile, Compound, List, ListVariant, NamedTag, Variant};
+use crate::{BedrockHeader, Compound, List, ListVariant, NamedTag, Variant};
 use std::collections::BTreeMap;
 use std::io::{self, Read};
 use std::string::FromUtf8Error;
@@ -16,31 +16,15 @@ pub enum ReadError {
     UnexpectedEndTag,
 }
 
-trait Readable: Sized {
+pub trait Readable: Sized {
     fn read_le(reader: &mut impl Read) -> Result<Self, ReadError>;
 }
 
 impl Readable for BedrockHeader {
     fn read_le(reader: &mut impl Read) -> Result<Self, ReadError> {
-        let version = u16::read_le(&mut *reader)?;
-        let size = u16::read_le(&mut *reader)?;
+        let version = u32::read_le(&mut *reader)?;
+        let size = u32::read_le(&mut *reader)?;
         Ok(BedrockHeader { version, size })
-    }
-}
-
-impl BedrockNbtFile {
-    pub fn read_le_without_header(reader: &mut impl Read) -> Result<Self, ReadError> {
-        Ok(Self {
-            header: None,
-            tag: NamedTag::read_le(reader)?,
-        })
-    }
-
-    pub fn read_le_with_header(reader: &mut impl Read) -> Result<Self, ReadError> {
-        Ok(Self {
-            header: Some(BedrockHeader::read_le(&mut *reader)?),
-            tag: NamedTag::read_le(reader)?,
-        })
     }
 }
 
@@ -197,5 +181,5 @@ fn read_structure() {
 
     let bytes = include_bytes!("../../tests/crossbow_piglin.mcstructure");
     let mut reader = bytes.reader();
-    BedrockNbtFile::read_le_without_header(&mut reader).unwrap();
+    NamedTag::read_le(&mut reader).unwrap();
 }

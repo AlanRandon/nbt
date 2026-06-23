@@ -1,21 +1,9 @@
 use crate::binary::TypeTag;
-use crate::{BedrockHeader, BedrockNbtFile, Compound, List, ListVariant, NamedTag, Variant};
+use crate::{BedrockHeader, Compound, List, ListVariant, NamedTag, Variant};
 use std::io::{self, Write};
 
 pub trait Writeable {
     fn write_le(&self, writer: &mut impl Write) -> io::Result<()>;
-}
-
-impl Writeable for BedrockNbtFile {
-    fn write_le(&self, writer: &mut impl Write) -> io::Result<()> {
-        if let Some(header) = &self.header {
-            header.write_le(&mut *writer)?;
-        }
-
-        self.tag.write_le(&mut *writer)?;
-
-        Ok(())
-    }
 }
 
 impl Writeable for BedrockHeader {

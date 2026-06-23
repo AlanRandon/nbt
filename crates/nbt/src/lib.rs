@@ -49,12 +49,6 @@ pub struct NamedTag(pub String, pub Variant);
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct BedrockHeader {
-    pub version: u16,
-    pub size: u16,
-}
-
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct BedrockNbtFile {
-    pub header: Option<BedrockHeader>,
-    pub tag: NamedTag,
+    pub version: u32,
+    pub size: u32,
 }
