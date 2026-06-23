@@ -152,6 +152,6 @@ impl<T: WriteNbt> WriteNbt for ListVariant<T> {
 
 impl<T: NbtPrimitive> WriteNbt for T {
     fn write_nbt(&self, writer: &mut impl Write, endianness: Endianness) -> io::Result<()> {
-        writer.write_all(self.into_bytes(endianness).as_ref())
+        writer.write_all(self.to_bytes(endianness).as_ref())
     }
 }

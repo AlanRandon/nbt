@@ -19,8 +19,8 @@ pub enum Error<'src> {
         values: Vec<parse::Variant<'src>>,
         compound_span: Span,
     },
-    #[error("integers may not be downcast for inclusion in list")]
-    DowncastInvalid {
+    #[error("integers may not be upcast for inclusion in list")]
+    UpcastInvalid {
         integer: parse::SpannedInt<'src>,
         result_type: IntType,
     },
@@ -39,7 +39,7 @@ pub enum Error<'src> {
         float: parse::SpannedFloat<'src>,
         result_type: FloatType,
     },
-    #[error("error parsing arguments for operation")]
+    #[error("error converting arguments for operation")]
     ArgumentError {
         operation_span: Span,
         operation_kind_span: Span,
@@ -254,7 +254,7 @@ impl<'src> parse::List<'src> {
         if type_set.is_empty() {
             TypeTag::EndCompound
         } else {
-            type_set.iter().next().unwrap().clone()
+            *type_set.iter().next().unwrap()
         }
     }
 }

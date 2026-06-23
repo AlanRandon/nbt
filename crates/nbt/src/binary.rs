@@ -25,7 +25,7 @@ pub enum TypeTag {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("The tag '{0}' was unrecognised")]
+#[error("found unknown tag '{0}'")]
 pub struct UnknownTagError(u8);
 
 impl TryFrom<u8> for TypeTag {
@@ -57,7 +57,7 @@ trait NbtPrimitive {
     const EMPTY_BYTE_ARRAY: Self::ByteArray;
 
     fn from_bytes(byte_array: Self::ByteArray, endianness: Endianness) -> Self;
-    fn into_bytes(&self, endianness: Endianness) -> Self::ByteArray;
+    fn to_bytes(&self, endianness: Endianness) -> Self::ByteArray;
 }
 
 macro_rules! impl_primitive {
@@ -74,7 +74,7 @@ macro_rules! impl_primitive {
                 }
             }
 
-            fn into_bytes(&self, endianness: Endianness) -> Self::ByteArray {
+            fn to_bytes(&self, endianness: Endianness) -> Self::ByteArray {
                 match endianness {
                     Endianness::Big => self.to_be_bytes(),
                     Endianness::Little => self.to_le_bytes(),

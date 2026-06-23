@@ -52,7 +52,7 @@ impl IndentedDisplay for List {
 
 impl IndentedDisplay for Compound {
     fn fmt_indented(&self, f: &mut std::fmt::Formatter<'_>, indent: usize) -> std::fmt::Result {
-        write!(f, "{{\n")?;
+        writeln!(f, "{{")?;
         for (index, (key, value)) in self.0.iter().enumerate() {
             write!(
                 f,
@@ -64,9 +64,9 @@ impl IndentedDisplay for Compound {
             value.fmt_indented(f, indent + 1)?;
 
             if index < self.0.len().saturating_sub(1) {
-                write!(f, ",\n")?;
+                writeln!(f, ",")?;
             } else {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
         write!(f, "{empty:\t>indent$}}}", empty = "", indent = indent)?;
@@ -141,14 +141,14 @@ impl<T: PrimitiveDisplay> ListVariant<T> {
 
 impl<T: IndentedDisplay> IndentedDisplay for ListVariant<T> {
     fn fmt_indented(&self, f: &mut std::fmt::Formatter<'_>, indent: usize) -> std::fmt::Result {
-        write!(f, "[\n")?;
+        writeln!(f, "[")?;
         for (index, item) in self.0.iter().enumerate() {
             write!(f, "{empty:\t>indent$}", empty = "", indent = indent + 1)?;
             item.fmt_indented(f, indent + 1)?;
             if index < self.0.len().saturating_sub(1) {
-                write!(f, ",\n")?;
+                writeln!(f, ",")?;
             } else {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
         write!(f, "{empty:\t>indent$}]", empty = "", indent = indent)?;
@@ -158,14 +158,14 @@ impl<T: IndentedDisplay> IndentedDisplay for ListVariant<T> {
 
 impl IndentedDisplay for ListVariant<ListVariant<u8>> {
     fn fmt_indented(&self, f: &mut std::fmt::Formatter<'_>, indent: usize) -> std::fmt::Result {
-        write!(f, "[\n")?;
+        writeln!(f, "[")?;
         for (index, item) in self.0.iter().enumerate() {
             write!(f, "{empty:\t>indent$}", empty = "", indent = indent + 1)?;
             item.fmt_typed_list(f)?;
             if index < self.0.len().saturating_sub(1) {
-                write!(f, ",\n")?;
+                writeln!(f, ",")?;
             } else {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
         write!(f, "{empty:\t>indent$}]", empty = "", indent = indent)?;
@@ -175,14 +175,14 @@ impl IndentedDisplay for ListVariant<ListVariant<u8>> {
 
 impl IndentedDisplay for ListVariant<ListVariant<u16>> {
     fn fmt_indented(&self, f: &mut std::fmt::Formatter<'_>, indent: usize) -> std::fmt::Result {
-        write!(f, "[\n")?;
+        writeln!(f, "[")?;
         for (index, item) in self.0.iter().enumerate() {
             write!(f, "{empty:\t>indent$}", empty = "", indent = indent + 1)?;
             item.fmt_typed_list(f)?;
             if index < self.0.len().saturating_sub(1) {
-                write!(f, ",\n")?;
+                writeln!(f, ",")?;
             } else {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
         write!(f, "{empty:\t>indent$}]", empty = "", indent = indent)?;
@@ -192,14 +192,14 @@ impl IndentedDisplay for ListVariant<ListVariant<u16>> {
 
 impl IndentedDisplay for ListVariant<ListVariant<u32>> {
     fn fmt_indented(&self, f: &mut std::fmt::Formatter<'_>, indent: usize) -> std::fmt::Result {
-        write!(f, "[\n")?;
+        writeln!(f, "[")?;
         for (index, item) in self.0.iter().enumerate() {
             write!(f, "{empty:\t>indent$}", empty = "", indent = indent + 1)?;
             item.fmt_typed_list(f)?;
             if index < self.0.len().saturating_sub(1) {
-                write!(f, ",\n")?;
+                writeln!(f, ",")?;
             } else {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
         write!(f, "{empty:\t>indent$}]", empty = "", indent = indent)?;
@@ -209,14 +209,14 @@ impl IndentedDisplay for ListVariant<ListVariant<u32>> {
 
 impl IndentedDisplay for ListVariant<ListVariant<u64>> {
     fn fmt_indented(&self, f: &mut std::fmt::Formatter<'_>, indent: usize) -> std::fmt::Result {
-        write!(f, "[\n")?;
+        writeln!(f, "[")?;
         for (index, item) in self.0.iter().enumerate() {
             write!(f, "{empty:\t>indent$}", empty = "", indent = indent + 1)?;
             item.fmt_typed_list(f)?;
             if index < self.0.len().saturating_sub(1) {
-                write!(f, ",\n")?;
+                writeln!(f, ",")?;
             } else {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
         write!(f, "{empty:\t>indent$}]", empty = "", indent = indent)?;

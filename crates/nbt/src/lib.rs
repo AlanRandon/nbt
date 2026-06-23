@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use std::collections::BTreeMap;
 
 pub mod binary;

@@ -23,7 +23,7 @@ impl<'src> TryFrom<parse::List<'src>> for List {
                             compound.try_into()
                         } else {
                             let mut map = BTreeMap::new();
-                            map.insert("".to_string(), item.try_into()?);
+                            map.insert(String::new(), item.try_into()?);
                             Ok(Compound(map))
                         }
                     })

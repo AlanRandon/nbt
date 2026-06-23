@@ -23,7 +23,7 @@ impl<'src> TryFrom<parse::SpannedInt<'src>> for u8 {
         match integer.integer.r#type {
             IntType::Int8 => {}
             IntType::Int16 | IntType::Int32 | IntType::Int64 => {
-                return Err(Error::DowncastInvalid {
+                return Err(Error::UpcastInvalid {
                     integer,
                     result_type: IntType::Int8,
                 });
@@ -70,7 +70,7 @@ impl<'src> TryFrom<parse::SpannedInt<'src>> for u16 {
         match integer.integer.r#type {
             IntType::Int8 | IntType::Int16 => {}
             IntType::Int32 | IntType::Int64 => {
-                return Err(Error::DowncastInvalid {
+                return Err(Error::UpcastInvalid {
                     integer,
                     result_type: IntType::Int16,
                 });
@@ -117,7 +117,7 @@ impl<'src> TryFrom<parse::SpannedInt<'src>> for u32 {
         match integer.integer.r#type {
             IntType::Int8 | IntType::Int16 | IntType::Int32 => {}
             IntType::Int64 => {
-                return Err(Error::DowncastInvalid {
+                return Err(Error::UpcastInvalid {
                     integer,
                     result_type: IntType::Int32,
                 });
@@ -207,8 +207,7 @@ impl<'src> IntBytes<'src> {
                 .filter(|byte| **byte != b'_')
                 .map(|byte| byte - b'0')
                 .enumerate()
-                .fold(Some(0i128), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0i128, |result, (place_value, digit)| {
                     let digit = i128::from(digit);
                     let place_value = u32::try_from(place_value).ok()?;
                     let multiplier = 10i128.checked_pow(place_value)?;
@@ -221,8 +220,7 @@ impl<'src> IntBytes<'src> {
                 .filter(|byte| **byte != b'_')
                 .map(|byte| byte - b'0')
                 .enumerate()
-                .fold(Some(0i128), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0i128, |result, (place_value, digit)| {
                     let digit = i128::from(digit);
                     let place_value = u32::try_from(place_value).ok()?;
                     let value = digit.checked_shl(place_value)?;
@@ -239,15 +237,14 @@ impl<'src> IntBytes<'src> {
                     _ => unreachable!("hex bytes must not contain non-hex digit"),
                 })
                 .enumerate()
-                .fold(Some(0i128), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0i128, |result, (place_value, digit)| {
                     let digit = i128::from(digit);
                     let place_value = u32::try_from(place_value).ok()?;
                     let value = digit.checked_shl(place_value.checked_mul(4)?)?;
                     Some(result | value)
                 }),
         }
-        .ok_or_else(|| TooLargeError)
+        .ok_or(TooLargeError)
     }
 }
 
@@ -272,8 +269,7 @@ impl<'src> TryFrom<parse::SpannedFloat<'src>> for f32 {
                 .filter(|byte| **byte != b'_')
                 .map(|byte| byte - b'0')
                 .enumerate()
-                .fold(Some(0f32), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0f32, |result, (place_value, digit)| {
                     let digit = f32::from(digit);
                     let place_value = i32::try_from(place_value).ok()?;
                     let value = digit * 10f32.powi(place_value);
@@ -297,8 +293,7 @@ impl<'src> TryFrom<parse::SpannedFloat<'src>> for f32 {
                 .filter(|byte| **byte != b'_')
                 .map(|byte| byte - b'0')
                 .enumerate()
-                .fold(Some(0f32), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0f32, |result, (place_value, digit)| {
                     let digit = f32::from(digit);
                     let place_value = i32::try_from(place_value)
                         .ok()?
@@ -327,8 +322,7 @@ impl<'src> TryFrom<parse::SpannedFloat<'src>> for f32 {
                 .filter(|byte| **byte != b'_')
                 .map(|byte| byte - b'0')
                 .enumerate()
-                .fold(Some(0f32), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0f32, |result, (place_value, digit)| {
                     let digit = f32::from(digit);
                     let place_value = i32::try_from(place_value).ok()?;
                     let value = digit * 10f32.powi(place_value);
@@ -370,8 +364,7 @@ impl<'src> TryFrom<parse::SpannedFloat<'src>> for f64 {
                 .filter(|byte| **byte != b'_')
                 .map(|byte| byte - b'0')
                 .enumerate()
-                .fold(Some(0f64), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0f64, |result, (place_value, digit)| {
                     let digit = f64::from(digit);
                     let place_value = i32::try_from(place_value).ok()?;
                     let value = digit * 10f64.powi(place_value);
@@ -395,8 +388,7 @@ impl<'src> TryFrom<parse::SpannedFloat<'src>> for f64 {
                 .filter(|byte| **byte != b'_')
                 .map(|byte| byte - b'0')
                 .enumerate()
-                .fold(Some(0f64), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0f64, |result, (place_value, digit)| {
                     let digit = f64::from(digit);
                     let place_value = i32::try_from(place_value)
                         .ok()?
@@ -425,8 +417,7 @@ impl<'src> TryFrom<parse::SpannedFloat<'src>> for f64 {
                 .filter(|byte| **byte != b'_')
                 .map(|byte| byte - b'0')
                 .enumerate()
-                .fold(Some(0f64), |result, (place_value, digit)| {
-                    let result = result?;
+                .try_fold(0f64, |result, (place_value, digit)| {
                     let digit = f64::from(digit);
                     let place_value = i32::try_from(place_value).ok()?;
                     let value = digit * 10f64.powi(place_value);

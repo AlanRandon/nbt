@@ -8,11 +8,11 @@ use std::string::FromUtf8Error;
 pub enum ReadError {
     #[error("IO error")]
     Io(#[from] io::Error),
-    #[error("Unknown tag")]
+    #[error("{0}")]
     UnknownTag(#[from] UnknownTagError),
-    #[error("Invalid UTF-8 in string")]
+    #[error("invalid utf-8 in string")]
     InvalidUtf8(#[from] FromUtf8Error),
-    #[error("Unexpected end tag")]
+    #[error("unexpected end tag")]
     UnexpectedEndTag,
 }
 

@@ -55,7 +55,7 @@ impl<'src> Parser<'src> {
         } else {
             self.tokenizer
                 .take_spanned_token()
-                .map_err(|err| Error::TokenizeError(err))?
+                .map_err(Error::TokenizeError)?
         };
 
         match token.token {
@@ -136,17 +136,14 @@ impl<'src> Parser<'src> {
         let mut expecting_item = true;
 
         loop {
-            match token.token {
-                Token::CloseBracket => {
-                    return Ok(Variant::List(List {
-                        span: Span(std::range::Range {
-                            start,
-                            end: token.span.0.end,
-                        }),
-                        list,
-                    }));
-                }
-                _ => {}
+            if token.token == Token::CloseBracket {
+                return Ok(Variant::List(List {
+                    span: Span(std::range::Range {
+                        start,
+                        end: token.span.0.end,
+                    }),
+                    list,
+                }));
             }
 
             if !expecting_item {
@@ -179,18 +176,15 @@ impl<'src> Parser<'src> {
         let mut expecting_item = true;
 
         loop {
-            match token.token {
-                Token::CloseBracket => {
-                    return Ok(IntList {
-                        span: Span(std::range::Range {
-                            start,
-                            end: token.span.0.end,
-                        }),
-                        header,
-                        list,
-                    });
-                }
-                _ => {}
+            if token.token == Token::CloseBracket {
+                return Ok(IntList {
+                    span: Span(std::range::Range {
+                        start,
+                        end: token.span.0.end,
+                    }),
+                    header,
+                    list,
+                });
             }
 
             if !expecting_item {
@@ -232,17 +226,14 @@ impl<'src> Parser<'src> {
         let mut expecting_item = true;
 
         loop {
-            match token.token {
-                Token::CloseBrace => {
-                    return Ok(Compound {
-                        span: Span(std::range::Range {
-                            start,
-                            end: token.span.0.end,
-                        }),
-                        fields,
-                    });
-                }
-                _ => {}
+            if token.token == Token::CloseBrace {
+                return Ok(Compound {
+                    span: Span(std::range::Range {
+                        start,
+                        end: token.span.0.end,
+                    }),
+                    fields,
+                });
             }
 
             if !expecting_item {
@@ -298,19 +289,16 @@ impl<'src> Parser<'src> {
         let mut expecting_item = true;
 
         loop {
-            match token.token {
-                Token::CloseParen => {
-                    return Ok(Operation {
-                        span: Span(std::range::Range {
-                            start: kind_span.0.start,
-                            end: token.span.0.end,
-                        }),
-                        kind_span,
-                        kind,
-                        arguments,
-                    });
-                }
-                _ => {}
+            if token.token == Token::CloseParen {
+                return Ok(Operation {
+                    span: Span(std::range::Range {
+                        start: kind_span.0.start,
+                        end: token.span.0.end,
+                    }),
+                    kind_span,
+                    kind,
+                    arguments,
+                });
             }
 
             if !expecting_item {
@@ -346,7 +334,7 @@ impl<'src> Parser<'src> {
         let token = self
             .tokenizer
             .take_spanned_token()
-            .map_err(|err| Error::TokenizeError(err))?;
+            .map_err(Error::TokenizeError)?;
 
         if predicate(&token) {
             Ok(token)
@@ -366,6 +354,21 @@ pub enum Variant<'src> {
     IntList(IntList<'src>),
     Operation(Box<Operation<'src>>),
     Bool(Span, bool),
+}
+
+impl<'src> Variant<'src> {
+    pub fn span(&self) -> Span {
+        match self {
+            Variant::Int(spanned_int) => spanned_int.span,
+            Variant::Float(spanned_float) => spanned_float.span,
+            Variant::String(spanned_string) => spanned_string.span,
+            Variant::Compound(compound) => compound.span,
+            Variant::List(list) => list.span,
+            Variant::IntList(int_list) => int_list.span,
+            Variant::Operation(operation) => operation.span,
+            Variant::Bool(span, _) => *span,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

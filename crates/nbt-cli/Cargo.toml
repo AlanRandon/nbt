@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bytes = "1.12.0"
 clap = { version = "4.6.1", features = ["derive"] }
 clap-file = "0.2.0"
+miette = { version = "7.6.0", features = ["fancy"] }
 nbt = { path = "../nbt" }

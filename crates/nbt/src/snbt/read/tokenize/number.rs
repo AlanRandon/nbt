@@ -149,15 +149,15 @@ impl<'src> NumberParser<'src> {
                     fractional_part,
                     exponent_part,
                 }));
-            } else {
-                let (signedness, r#type) = self.take_int_type();
-                return Ok(Number::Int(Int {
-                    sign,
-                    r#type,
-                    signedness,
-                    digits: IntBytes::Denary(integer_part),
-                }));
             }
+
+            let (signedness, r#type) = self.take_int_type();
+            return Ok(Number::Int(Int {
+                sign,
+                r#type,
+                signedness,
+                digits: IntBytes::Denary(integer_part),
+            }));
         }
 
         if matches!(
@@ -269,15 +269,14 @@ impl<'src> NumberParser<'src> {
             .count();
 
         let seq = source.get(..length).unwrap();
-        let seq = if seq.last() == Some(&b'_') {
+
+        if seq.last() == Some(&b'_') {
             self.position += length - 1;
             seq.get(..length - 1).unwrap()
         } else {
             self.position += length;
             seq
-        };
-
-        seq
+        }
     }
 
     pub fn take_binary_sequence(&mut self) -> &'src [u8] {
@@ -291,15 +290,14 @@ impl<'src> NumberParser<'src> {
             .count();
 
         let seq = source.get(2..).unwrap().get(..length).unwrap();
-        let seq = if seq.last() == Some(&b'_') {
+
+        if seq.last() == Some(&b'_') {
             self.position += length + 1;
             seq.get(..length - 1).unwrap()
         } else {
             self.position += length + 2;
             seq
-        };
-
-        seq
+        }
     }
 
     pub fn take_hex_sequence(&mut self) -> &'src [u8] {
@@ -316,15 +314,14 @@ impl<'src> NumberParser<'src> {
             .count();
 
         let seq = source.get(2..).unwrap().get(..length).unwrap();
-        let seq = if seq.last() == Some(&b'_') {
+
+        if seq.last() == Some(&b'_') {
             self.position += length + 1;
             seq.get(..length - 1).unwrap()
         } else {
             self.position += length + 2;
             seq
-        };
-
-        seq
+        }
     }
 }
 

@@ -65,19 +65,19 @@ pub struct Tokenizer<'src> {
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("invalid token at {0:?}")]
+    #[error("invalid token")]
     InvalidToken(SourcePosition),
-    #[error("unclosed string escape at {0:?}")]
+    #[error("unclosed string escape")]
     UnclosedEscape(SourcePosition),
-    #[error("unknown string escape at {0:?}")]
+    #[error("unknown string escape")]
     UnknownEscape(SourcePosition),
-    #[error("escape contains non-digits at {0:?}")]
+    #[error("escape contains non-digits")]
     EscapeNonDigits(SourcePosition),
-    #[error("escape contains invalid character at {0:?}")]
+    #[error("escape contains invalid character")]
     InvalidEscapeChar(SourcePosition, CharTryFromError),
-    #[error("invalid number at {0:?}")]
+    #[error("invalid number")]
     InvalidNumber(SourcePosition),
-    #[error("invalid utf-8 in string at {0:?}")]
+    #[error("invalid utf-8 in string")]
     InvalidUtf8(SourcePosition, Utf8Error),
 }
 
@@ -332,9 +332,9 @@ impl<'src> Tokenizer<'src> {
                         })?;
                         self.position += 2 + close_pos;
                         return Ok(StringContentToken::Named(name));
-                    } else {
-                        return Err(Error::UnclosedEscape(SourcePosition(self.position)));
                     }
+
+                    return Err(Error::UnclosedEscape(SourcePosition(self.position)));
                 }
                 _ => return Err(Error::UnclosedEscape(SourcePosition(self.position))),
             },
