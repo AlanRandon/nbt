@@ -1,0 +1,14 @@
+[package]
+name = "extract-structures"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bleveldb = "1.0.0"
+tempfile = "3.27.0"
+fs_extra = "1.3.0"
+pretty_env_logger = "0.5.0"
+log = "0.4.33"
+thiserror.workspace = true
+clap.workspace = true
+anyhow = "1.0.103"

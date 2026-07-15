@@ -14,7 +14,12 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];
       perSystem =
-        { pkgs, system, ... }:
+        {
+          pkgs,
+          system,
+          lib,
+          ...
+        }:
 
         let
           rust = fenix.packages."${system}";
@@ -26,8 +31,21 @@
           };
 
           devShells.default = pkgs.mkShell {
-            nativeBuildInputs = [ toolchain ];
-            packages = [ rust.rust-analyzer ];
+            nativeBuildInputs = [
+              toolchain
+              pkgs.pkg-config
+            ];
+
+            buildInputs = [
+              pkgs.snappy
+            ];
+
+            packages = [
+              rust.rust-analyzer
+            ];
+
+            RUSTFLAGS = "-L native=${pkgs.zlib.static}/lib";
+            LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
           };
         };
     };
